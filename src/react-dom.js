@@ -13,7 +13,11 @@ function createDOM(vdom) {
     const { type, props } = vdom;
     let dom;
     if (typeof type === 'function') {
-      return updateFunctionComponent(vdom);
+      if (type.isReactComponent) {
+        return updateClassComponent(vdom);
+      } else {
+        return updateFunctionComponent(vdom);
+      }
     } else {
       dom = document.createElement(type);
     }
@@ -58,8 +62,25 @@ function updateFunctionComponent(vdom) {
   const { type, props } = vdom;
   // 可能是原生虚拟DOM，也可能是组件
   const renderVdom = type(props);
-  console.log('render comp: ', type.name, renderVdom);
+  console.log('render function comp: ', type.name, renderVdom);
   return createDOM(renderVdom);
+}
+
+/**
+ * 1.先创建一个类组件的实例 new Comp(props) this.porps = props
+ * 2.调用实例的render方法得到一个react元素
+ * 3.把这个react元素转成真实的dom元素插入到页面中
+ * @param {*} vdom 
+ */
+function updateClassComponent(vdom) {
+  const { type, props } = vdom;
+  const classInstance = new type(props);
+  const renderVdom = classInstance.render();
+  console.log('render class comp: ', type.name, renderVdom);
+  const dom = createDOM(renderVdom);
+  // 让类组件实例上挂一个dom,指向类组件的实例的真实dom, 后面组件更新setState会用到
+  classInstance.dom = dom;
+  return dom;
 }
 
 const reactDom = { render };

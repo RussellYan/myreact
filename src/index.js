@@ -4,6 +4,8 @@
 import React from './react';
 import ReactDOM from './react-dom';
 
+import ClassComp from './comps/classComp';
+
 // const element = React.createElement(
 //   'h1', 
 //   {
@@ -15,14 +17,10 @@ import ReactDOM from './react-dom';
 //   React.createElement('span', null, 'hello, '),
 //   'my react'
 // );
-function Hello(props) {
-  return <h2>hello, {props.name}</h2>
-}
-function Welcom(props) {
-  return <Hello {...props} />
-}
-const element = <Welcom name='functonComponent' />
-console.log(element);
+
+// babel会自动将标签转化为react元素对象
+const element = <ClassComp name='functonComponent' />;
+// console.log(element.type.isReactComponent);
 ReactDOM.render(
   element,
   document.getElementById('root')
