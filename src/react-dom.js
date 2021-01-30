@@ -11,7 +11,12 @@ function createDOM(vdom) {
     return document.createTextNode(vdom);
   } else {
     const { type, props } = vdom;
-    const dom = document.createElement(type);
+    let dom;
+    if (typeof type === 'function') {
+      return updateFunctionComponent(vdom);
+    } else {
+      dom = document.createElement(type);
+    }
     // 将props设置到真实dom
     updateProps(dom, props);
     // 处理children
@@ -47,6 +52,14 @@ function reconcileChildren(children, parentDom) {
   } else {
     parentDom.textContent = children ? children.toString() : '';
   }
+}
+
+function updateFunctionComponent(vdom) {
+  const { type, props } = vdom;
+  // 可能是原生虚拟DOM，也可能是组件
+  const renderVdom = type(props);
+  console.log('render comp: ', type.name, renderVdom);
+  return createDOM(renderVdom);
 }
 
 const reactDom = { render };
