@@ -5,14 +5,15 @@ import { createDOM } from './react-dom';
  * 单例用对象就够了，如果需要很多对象或者实例就用类
  */
 export const updateQueue = {
-  updaters: [], // 更新器的数组
+  updaters: new Set(), // 更新器的集合
   isBatchingUpdate: false, // 是否处于批量更新模式
   add(updater) { // 增加一个更新器
-    this.updaters.push(updater);
+    this.updaters.add(updater);
   },
   batchUpdate() { // 强制实现批量组件更新
     this.updaters.forEach(updater => updater.updateComponent());
     this.isBatchingUpdate = false;
+    this.updaters.clear();
   }
 }
 // 更新器
