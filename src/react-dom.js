@@ -1,10 +1,13 @@
 
 function render(vdom, container) {
+  // console.log('vdom: ===> ', vdom);
   const dom = createDOM(vdom);
+  // console.log('dom: ===> ', dom);
   container.appendChild(dom);
 }
 
-function createDOM(vdom) {
+export function createDOM(vdom) {
+  // console.log('enter createDOM: => ', vdom);
   if (!vdom) {
     return '';
   } else if (['number', 'string'].includes(typeof vdom)) {
@@ -39,7 +42,10 @@ function updateProps(dom, props) {
       for (let okey in styleObj) {
         dom.style[okey] = styleObj[okey];
       }
-    } else {
+    } else if (key.startsWith('on') && /[A-Z]/.test(key.substr(2, 1))) { 
+      // 绑定事件
+      dom[key.toLowerCase()] = props[key];
+     } else {
       dom[key] = props[key];
     }
   }
@@ -62,7 +68,7 @@ function updateFunctionComponent(vdom) {
   const { type, props } = vdom;
   // 可能是原生虚拟DOM，也可能是组件
   const renderVdom = type(props);
-  console.log('render function comp: ', type.name, renderVdom);
+  // console.log('render function comp: ', type.name, renderVdom);
   return createDOM(renderVdom);
 }
 
@@ -76,12 +82,12 @@ function updateClassComponent(vdom) {
   const { type, props } = vdom;
   const classInstance = new type(props);
   const renderVdom = classInstance.render();
-  console.log('render class comp: ', type.name, renderVdom);
+  // console.log('render class comp: ', type.name, renderVdom);
   const dom = createDOM(renderVdom);
   // 让类组件实例上挂一个dom,指向类组件的实例的真实dom, 后面组件更新setState会用到
   classInstance.dom = dom;
   return dom;
 }
 
-const reactDom = { render };
-export default reactDom;
+const ReactDom = { render, createDOM };
+export default ReactDom;

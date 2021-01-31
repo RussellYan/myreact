@@ -19,8 +19,9 @@ import ClassComp from './comps/classComp';
 // );
 
 // babel会自动将标签转化为react元素对象
-const element = <ClassComp name='functonComponent' />;
-// console.log(element.type.isReactComponent);
+const element = <ClassComp name='classComp' />;
+// console.log('element ========> ', element.type.isReactComponent, element);
+
 ReactDOM.render(
   element,
   document.getElementById('root')
