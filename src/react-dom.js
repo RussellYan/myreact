@@ -7,11 +7,10 @@ function render(vdom, container) {
 }
 
 export function createDOM(vdom) {
-  // console.log('enter createDOM: => ', vdom);
-  if (!vdom) {
-    return '';
-  } else if (['number', 'string'].includes(typeof vdom)) {
+  if (['number', 'string'].includes(typeof vdom)) {
     return document.createTextNode(vdom);
+  } else if (!vdom) {
+    return document.createTextNode('');
   } else {
     const { type, props } = vdom;
     let dom;
