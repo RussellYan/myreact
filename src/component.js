@@ -75,16 +75,14 @@ export class Component {
   }
 
   setState(partialState) {
-    // 合并状态
-    this.state = { ...this.state, ...partialState };
-    // 实例render函数返回新的vdom
-    const renderVdom = this.render();
-    updateClassInstance(this, renderVdom);
+    this.updater.addState(partialState);
   }
 
+  // 在 updater中调用
   forceUpdate() {
     updateClassInstance(this, this.render());
   }
+
 }
 
 function updateClassInstance(classInstance, renderVdom) {

@@ -3,10 +3,12 @@ import { Component } from '../component';
 class Welcome extends Component {
   constructor(props) {
     super(props);
-    this.state = {number: 0};
+    this.state = {number: 0, type: 'clcik'};
   }
   click = async () => {
     this.setState({number: this.state.number + 1});
+    console.log(this.state);
+    this.setState(preState => ({ number: preState.number + 1 }));
     console.log(this.state);
   }
   render() {
