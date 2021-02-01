@@ -1,7 +1,13 @@
+
+import { Component } from './component';
+
 function createElement(type, config, children) {
+  let ref;
   if (config) {
     delete config._owner;
     delete config._store;
+    ref = config.ref;
+    delete config.reg;
   }
   let props = {...config};
   if (arguments.length > 3) {
@@ -11,9 +17,18 @@ function createElement(type, config, children) {
   props.children = children;
   return {
     type,
-    props
+    props,
+    ref
   }
 };
 
-const React = { createElement };
+function createRef(params) {
+  return { current: null };
+}
+
+const React = {
+  createElement,
+  Component,
+  createRef
+};
 export default React;

@@ -13,7 +13,7 @@ export function createDOM(vdom) {
   } else if (!vdom) {
     return document.createTextNode('');
   } else {
-    const { type, props } = vdom;
+    const { type, props, ref } = vdom;
     let dom;
     if (typeof type === 'function') {
       if (type.isReactComponent) {
@@ -29,6 +29,9 @@ export function createDOM(vdom) {
     // 处理children
     if (props.children) {
       reconcileChildren(props.children, dom);
+    }
+    if (ref) {
+      ref.current = dom;
     }
     return dom;
   }
