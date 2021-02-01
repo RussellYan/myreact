@@ -63,9 +63,6 @@ class Updater {
 
 }
 
-
-
-
 export class Component {
   static isReactComponent = true;
   constructor(props) {

@@ -45,6 +45,7 @@ function updateProps(dom, props) {
     } else if (key.startsWith('on') && /[A-Z]/.test(key.substr(2, 1))) { 
       // 绑定事件
       // dom[key.toLowerCase()] = props[key];
+      // 讲事件委托给document
       addEvant(dom, key.toLowerCase(), props[key]);
      } else {
       dom[key] = props[key];

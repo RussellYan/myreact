@@ -15,4 +15,5 @@ function createElement(type, config, children) {
   }
 };
 
-export default { createElement };
+const React = { createElement };
+export default React;

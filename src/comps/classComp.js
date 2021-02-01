@@ -5,17 +5,23 @@ class Welcome extends Component {
     super(props);
     this.state = {number: 0, type: 'clcik'};
   }
-  click = async () => {
-    this.setState({number: this.state.number + 1});
-    console.log(this.state);
-    this.setState(preState => ({ number: preState.number + 1 }));
-    console.log(this.state);
+  clickA = () => {
+    console.log('点击buttonA');
+  }
+  clickB = () => {
+    console.log('点击buttonB');
+  }
+  clickDiv = () => {
+    console.log('点击div');
   }
   render() {
     return (
-      <div>
+      <div onClick={this.clickDiv}>
         <strong>{this.props.name}, {this.state.number}</strong>
-        <button onClick={this.click}>plus</button>
+        <br/>
+        <button onClick={this.clickA}>A</button>
+        <br/>
+        <button onClick={this.clickB}>B</button>
       </div>
     )
   }
