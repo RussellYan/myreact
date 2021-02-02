@@ -28,6 +28,11 @@ class Updater {
   addState(partialState) {
     // 先把分装台添加到 pendingStates 中
     this.pendingStates.push(partialState);
+    // 管理 props、state更新
+    this.emitUpdate();
+  }
+  // TODO
+  emitUpdate() {
     // 如果当前处于批量更新模式，也就是异步更新模式，把当前的update实例放到updateQueue里
     if (updateQueue.isBatchingUpdate) {
       updateQueue.add(this);
@@ -36,13 +41,13 @@ class Updater {
       this.updateComponent();
     }
   }
-  
   updateComponent() {
     const { classInstance, pendingStates } = this;
     if (pendingStates.length) {
-      classInstance.state = this.getState();
-      // 组件强制更新
-      classInstance.forceUpdate();
+      // classInstance.state = this.getState();
+      // classInstance.forceUpdate();
+      const nextState = this.getState();
+      shouldUpdate(classInstance, nextState);
     }
   }
 
@@ -78,7 +83,11 @@ export class Component {
 
   // 在 updater中调用
   forceUpdate() {
-    updateClassInstance(this, this.render());
+    if (this.componentWillUpdate) {
+      this.componentWillUpdate()
+    }
+    const renderVdom = this.render();
+    updateClassInstance(this, renderVdom);
   }
 
 }
@@ -89,4 +98,18 @@ function updateClassInstance(classInstance, renderVdom) {
   let newDom = createDOM(renderVdom);
   oldDom.parentNode.replaceChild(newDom, oldDom);
   classInstance.dom = newDom;
+  if (classInstance.componentDidUpdate) {
+    classInstance.componentDidUpdate()
+  }
+}
+
+function shouldUpdate(classInstance, nextState) {
+  // 要先更新state
+  classInstance.state = nextState;
+  const { shouldComponentUpdate, props } = classInstance;
+  // 如果shouldComponentUpdate返回false,则不更新
+  if (shouldComponentUpdate && shouldComponentUpdate(props, nextState)) {
+    return;
+  }
+  classInstance.forceUpdate();
 }

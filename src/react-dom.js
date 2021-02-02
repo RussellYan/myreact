@@ -9,7 +9,7 @@ function render(vdom, container) {
 
 export function createDOM(vdom) {
   if (['number', 'string'].includes(typeof vdom)) {
-    return document.createTextNode(vdom);
+    return document.createTextNode(vdom.toString());
   } else if (!vdom) {
     return document.createTextNode('');
   } else {
@@ -27,7 +27,7 @@ export function createDOM(vdom) {
     // 将props设置到真实dom
     updateProps(dom, props);
     // 处理children
-    if (props.children) {
+    if (props.children || props.children === 0) {
       reconcileChildren(props.children, dom);
     }
     if (ref) {
@@ -59,7 +59,7 @@ function updateProps(dom, props) {
 function reconcileChildren(children, parentDom) {
   const childrenType = typeof children;
   if (['number', 'string'].includes(childrenType)) {
-    parentDom.textContent = children;
+    parentDom.textContent = children.toString();
   } else if (Array.isArray(children)) {
     children.forEach(child => render(child, parentDom));
   } else if (childrenType === 'object'){
@@ -86,11 +86,17 @@ function updateFunctionComponent(vdom) {
 function updateClassComponent(vdom) {
   const { type, props } = vdom;
   const classInstance = new type(props);
+  if (classInstance.componentWillMount) {
+    classInstance.componentWillMount();
+  }
   const renderVdom = classInstance.render();
   // console.log('render class comp: ', type.name, renderVdom);
   const dom = createDOM(renderVdom);
   // 让类组件实例上挂一个dom,指向类组件的实例的真实dom, 后面组件更新setState会用到
   classInstance.dom = dom;
+  if (classInstance.componentDidMount) {
+    classInstance.componentDidMount();
+  }
   return dom;
 }
 
