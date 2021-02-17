@@ -1,4 +1,4 @@
-import { createDOM } from './react-dom';
+import { createDOM, compareTwoVdom } from './react-dom';
 
 /**
  * 什么时候用类，什么时候用对象？
@@ -19,35 +19,36 @@ export const updateQueue = {
 // 更新器
 class Updater {
   constructor(classInstance) {
-    // class-component 实例
+    // class component 实例
     this.classInstance = classInstance;
     // 等待更新的状态
     this.pendingStates = [];
   }
 
   addState(partialState) {
-    // 先把分装台添加到 pendingStates 中
+    // 先把分状态添加到 pendingStates 中
     this.pendingStates.push(partialState);
     // 管理 props、state更新
     this.emitUpdate();
   }
   // TODO
-  emitUpdate() {
+  emitUpdate(nextProps) {
+    this.nextProps = nextProps;
     // 如果当前处于批量更新模式，也就是异步更新模式，把当前的update实例放到updateQueue里
-    if (updateQueue.isBatchingUpdate) {
+    if (updateQueue.isBatchingUpdate && !this.nextProps) {
       updateQueue.add(this);
     } else {
-      // 如果当前是同步更新，则直接更新组件
+      // 如果当前是同步更新或者有nextProps，则直接更新组件
       this.updateComponent();
     }
   }
   updateComponent() {
-    const { classInstance, pendingStates } = this;
+    const { classInstance, pendingStates, nextProps } = this;
     if (pendingStates.length) {
       // classInstance.state = this.getState();
       // classInstance.forceUpdate();
       const nextState = this.getState();
-      shouldUpdate(classInstance, nextState);
+      shouldUpdate(classInstance, nextProps, nextState);
     }
   }
 
@@ -86,8 +87,14 @@ export class Component {
     if (this.componentWillUpdate) {
       this.componentWillUpdate()
     }
-    const renderVdom = this.render();
-    updateClassInstance(this, renderVdom);
+    const newVdom = this.render();
+    // updateClassInstance(this, newVdom);
+    const parentNode = this.oldVDom.dom.parentNode;
+    const currenVdom = compareTwoVdom(parentNode, this.oldVDom, newVdom);
+    this.oldVdom = currenVdom;
+    if (this.componentDidUpdate) {
+      this.componentDidUpdate();
+    }
   }
 
 }
@@ -103,12 +110,15 @@ function updateClassInstance(classInstance, renderVdom) {
   }
 }
 
-function shouldUpdate(classInstance, nextState) {
+function shouldUpdate(classInstance, nextProps, nextState) {
+  if (nextProps) {
+    classInstance.props = nextProps;
+  }
   // 要先更新state
   classInstance.state = nextState;
   const { shouldComponentUpdate, props } = classInstance;
   // 如果shouldComponentUpdate返回false,则不更新
-  if (shouldComponentUpdate && shouldComponentUpdate(props, nextState)) {
+  if (shouldComponentUpdate && !shouldComponentUpdate(props, nextState)) {
     return;
   }
   classInstance.forceUpdate();

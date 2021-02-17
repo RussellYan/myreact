@@ -1,8 +1,8 @@
 import { addEvant } from './event';
 
 function render(vdom, container) {
-  // console.log('vdom: ===> ', vdom);
-  const dom = createDOM(vdom);
+  console.log('vdom: ===> ', vdom, {...vdom});
+  const dom = createDOM({...vdom});
   // console.log('dom: ===> ', dom);
   container.appendChild(dom);
 }
@@ -13,7 +13,7 @@ export function createDOM(vdom) {
   } else if (!vdom) {
     return document.createTextNode('');
   } else {
-    const { type, props, ref } = vdom;
+    const { type, props = {}, ref } = vdom;
     let dom;
     if (typeof type === 'function') {
       if (type.isReactComponent) {
@@ -27,12 +27,15 @@ export function createDOM(vdom) {
     // 将props设置到真实dom
     updateProps(dom, props);
     // 处理children
+    console.log('debug:====>>>>>', props);
     if (props.children || props.children === 0) {
       reconcileChildren(props.children, dom);
     }
     if (ref) {
       ref.current = dom;
     }
+    console.log(Object.isExtensible(vdom), vdom);
+    vdom.dom = dom;
     return dom;
   }
 }
@@ -89,15 +92,94 @@ function updateClassComponent(vdom) {
   if (classInstance.componentWillMount) {
     classInstance.componentWillMount();
   }
+  // 虚拟dom {type: div}, 而classInstance是 {type: ClassComponentName}
   const renderVdom = classInstance.render();
-  // console.log('render class comp: ', type.name, renderVdom);
+  // 真实dom;
   const dom = createDOM(renderVdom);
+  // 这个虚拟Dom的dom属性和render方法返回的虚拟Dom的dom属性都指向真实Dom
+  console.log('renderVdom: ===>', Object.isExtensible(renderVdom), vdom.classInstance, vdom.dom);
+  vdom.dom = renderVdom.dom = dom;
+  // 让组件实例的老vdom属性指向本次render出来的渲染，留待后面做dom对比时使用
+  classInstance.oldVdom = renderVdom;
   // 让类组件实例上挂一个dom,指向类组件的实例的真实dom, 后面组件更新setState会用到
   classInstance.dom = dom;
   if (classInstance.componentDidMount) {
     classInstance.componentDidMount();
   }
   return dom;
+}
+
+/**
+ * 找到新旧vdom的差异，吧相应的差异更新到真实的dom上
+ * @param {*} parentDom 
+ * @param {*} oldVdom 
+ * @param {*} newVdom
+ */
+export function compareTwoVdom(parentDom, oldVdom, newVdom) {
+  if (!oldVdom && !newVdom) {
+    return null;
+  } else if (oldVdom && !newVdom) { // 意味着节点被删除
+    const currentDom = oldVdom.dom;
+    parentDom.removeChild(currentDom);
+    if (oldVdom.classInstance && oldVdom.classInstance.componentWillUnmount) {
+      oldVdom.classInstance.componentWillUnmount();
+    }
+    return null;
+  } else if (!oldVdom && newVdom) { // 意味着新建节点
+    const newDom = createDOM(newVdom);
+    newVdom.dom = newDom;
+    // TODO 待优化
+    parentDom.appendChild(newDom);
+    return newVdom;
+  } else {
+    // dom diff
+    updateElement(oldVdom, newVdom);
+    return newVdom
+  }
+}
+
+/**
+ * Dom-diff的时候，React为了优化性能有一些假设条件:
+ * 1.不考虑跨层移动的情况
+ * @param {*} oldVdom 
+ * @param {*} newVdom 
+ */
+function updateElement(oldVdom, newVdom) {
+  // 如果走到这里，意味着要复用老的dom节点
+  let currentDom = newVdom.dom = oldVdom.dom;
+  newVdom.classInstance = oldVdom.classInstance;
+  if (typeof oldVdom.type === 'string') { // 原生dom类型
+    updateProps(currentDom, oldVdom.props, newVdom.props);
+    updateChildren(currentDom, oldVdom.props.children, newVdom.props.children);
+  } else if (typeof oldVdom.type === 'function') { // 类组件类型
+    updateClassInstance(oldVdom, newVdom);
+  }
+}
+
+function updateChildren(parentDom, oldChildrenVdom, newChildrenVdom) {
+  const oType = typeof oldChildrenVdom;
+  const nType = typeof newChildrenVdom;
+  const txtDomTypes = ['string', 'number'];
+  if (txtDomTypes.includes(oType) && txtDomTypes.includes(nType)) {
+    if (oldChildrenVdom !== newChildrenVdom) {
+      parentDom.innerText = newChildrenVdom;
+    }
+    return;
+  }
+  const maxLength = Math.max(oldChildrenVdom.length, newChildrenVdom.length);
+  // TODO dom-diff的优化
+  for (let i = 0; i < maxLength; i++) {
+    compareTwoVdom(parentDom, oldChildrenVdom[i], newChildrenVdom[i]);
+  }
+}
+
+function updateClassInstance(oldVdom, newVdom) {
+  const classInstance = oldVdom.classInstance;
+  if (classInstance.componentWillReceiveProps) {
+    classInstance.componentWillReceiveProps();
+  }
+  classInstance.updater.emitUpdate(newVdom.porps);
+  
 }
 
 const ReactDom = { render, createDOM };
