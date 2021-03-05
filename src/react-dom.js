@@ -1,8 +1,8 @@
 import { addEvant } from './event';
 
 function render(vdom, container) {
-  console.log('vdom: ===> ', vdom, {...vdom});
-  const dom = createDOM({...vdom});
+  // console.log('vdom: ===> ', vdom, {...vdom});
+  const dom = createDOM(vdom);
   // console.log('dom: ===> ', dom);
   container.appendChild(dom);
 }
@@ -34,8 +34,7 @@ export function createDOM(vdom) {
     if (ref) {
       ref.current = dom;
     }
-    console.log(Object.isExtensible(vdom), vdom);
-    vdom.dom = dom;
+    // vdom.dom = dom;
     return dom;
   }
 }
@@ -93,7 +92,7 @@ function updateClassComponent(vdom) {
     classInstance.componentWillMount();
   }
   // 虚拟dom {type: div}, 而classInstance是 {type: ClassComponentName}
-  const renderVdom = classInstance.render();
+  const renderVdom = {...classInstance.render()};
   // 真实dom;
   const dom = createDOM(renderVdom);
   // 这个虚拟Dom的dom属性和render方法返回的虚拟Dom的dom属性都指向真实Dom

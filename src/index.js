@@ -1,10 +1,11 @@
 // import React from 'react';
-// import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom';
+import App from './app';
 
-import React from './react';
-import ReactDOM from './react-dom';
-
-import ClassComp from './comps/classComp';
+// import React from './react';
+// import ReactDOM from './react-dom';
+// import { ef } from './utils';
+// import ClassComp from './comps/classComp';
 
 // const element = React.createElement(
 //   'h1', 
@@ -18,11 +19,13 @@ import ClassComp from './comps/classComp';
 //   'my react'
 // );
 
-// babel会自动将标签转化为react元素对象
-const element = <ClassComp name='classComp' />;
-// console.log('element ========> ', element.type.isReactComponent, element);
+
+// ReactDOM.render(
+//   ef(element),
+//   document.getElementById('root')
+// );
 
 ReactDOM.render(
-  element,
+  <App />,
   document.getElementById('root')
 );

@@ -1,4 +1,5 @@
 import { createDOM, compareTwoVdom } from './react-dom';
+import { ef } from './utils';
 
 /**
  * 什么时候用类，什么时候用对象？
@@ -87,8 +88,9 @@ export class Component {
     if (this.componentWillUpdate) {
       this.componentWillUpdate()
     }
-    const newVdom = this.render();
+    const newVdom = ef(this.render());
     // updateClassInstance(this, newVdom);
+    console.log('~~~~~~~> ', this.oldVDom);
     const parentNode = this.oldVDom.dom.parentNode;
     const currenVdom = compareTwoVdom(parentNode, this.oldVDom, newVdom);
     this.oldVdom = currenVdom;
