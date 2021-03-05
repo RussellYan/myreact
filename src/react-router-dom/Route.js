@@ -13,7 +13,6 @@ class Route extends Component {
     const { path = '/', component: Comp, exact = false } = this.props;
     const paramNames = [];
     const regexp = pathToRegexp(path, paramNames, {end: exact});
-    console.log(pathname, path);
     const match = pathname.match(regexp);
     const compProps = {
       location: this.context.location
