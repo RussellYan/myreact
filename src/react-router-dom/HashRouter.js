@@ -27,21 +27,30 @@ class HashRouter extends Component {
   render() {
     const that = this;
     const { location } = this.state;
-    console.log('location: ', location);
     const value = {
       location,
       history: {
         // 定义一个history对象，有一个push方法用来跳转路径
         push(arg) {
-          if (arg && typeof arg === 'object') {
+          const type = typeof arg;
+          const isObject = type && type === 'object';
+          if (that.block) {
+            const confirm = confirm(that.block(isObject ? arg : {pathname: arg} ));
+            if (confirm) return;
+          }
+          if (isObject) {
             that.locationState = arg.state;
+            console.log(arg.state);
             window.location.hash = arg.pathname;
-          } else if (typeof arg === 'string') {
+          } else if (type === 'string') {
             that.locationState = null;
             window.location.hash = arg;
           }
 
         }
+      },
+      block(message) {
+        that.block = message;
       }
     }
     return (

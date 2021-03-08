@@ -14,14 +14,13 @@ class Switch extends Component {
     const childrenArray = Array.isArray(children) ? children : [children];
     for (let i=0; i< childrenArray.length; i++) {
       const child = childrenArray[i];
-      const { path, exact } = child.props;
+      const { path = '/', exact = false } = child.props;
       const paramNames = [];
       const regexp = pathToRegexp(path, paramNames, {end: exact});
       const match = pathname.match(regexp);
       if (match) {
         return  child;
       }
-      
     }
     return null;
   }

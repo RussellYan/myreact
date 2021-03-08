@@ -5,10 +5,17 @@ class Profile extends Component {
     super(props);
     this.state = {};
   }
+  logout = () => {
+    console.log('~~~~~~~~~ ', this.props);
+    localStorage.removeItem('login');
+    this.props.history.push({pathname: '/login', state: {from: '/profile'}})
+  }
   render() {
-    console.log('profile => ', this.props.location)
     return (
-      <div>Profile</div>
+      <div>
+        <h3>Profile</h3>
+        <button onClick={this.logout}>退出</button>
+      </div>
     );
   }
 }

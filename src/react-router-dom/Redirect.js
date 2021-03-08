@@ -1,16 +1,10 @@
-import React, { Component } from 'react';
-import Content from './context';
+import React from 'react';
+import Context from './context';
 
-class Redirect extends Component {
-  static contextType = RouterContext;
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
+export default class Redirect extends React.Component {
+  static contextType = Context;
   render() {
     this.context.history.push(this.props.to);
     return null;
   }
 }
-
-export default Redirect;

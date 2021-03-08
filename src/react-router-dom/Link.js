@@ -14,7 +14,7 @@ class Link extends Component {
   render() {
     // return <a href={`#${this.props.to}`}>{this.props.children}</a> // 只适合哈希路由
     return (
-      <a onClick={this.jump} >{this.props.children}</a>
+      <a onClick={this.jump} {...this.props}>{this.props.children}</a>
     );
   }
 }
