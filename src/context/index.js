@@ -2,9 +2,9 @@ import React, {Component} from 'react';
 // 骗过React
 const REACT_CONTEXT_TYPE = Symbol.for('react.context');
 const REACT_PROVIDER_TYPE = Symbol.for('react.provider');
-const createContext = () => {
+const createContext = (defaultValue) => {
   class Provider extends Component {
-    static value;
+    static value = defaultValue;
     $$typeof = REACT_PROVIDER_TYPE;
     constructor(props) {
       super(props);
@@ -30,3 +30,5 @@ const createContext = () => {
 }
 
 export default createContext;
+
+// // 以上的只能跑起基本的demo，还有很多问题没有解决, 参考https://juejin.cn/post/6844903936197935112
